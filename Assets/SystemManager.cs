@@ -4,11 +4,13 @@ using UnityEngine.UI;
 public class SystemManager : MonoBehaviour
 {
     #region Singleton
-    public static SystemManager instance;
+    public static SystemManager instance { get; private set; }
 
     private void Awake()
     {
-        if (instance == null)
+        if (instance != null && instance != this)
+            Destroy(this);
+        else
             instance = this;
     }
     #endregion
@@ -18,6 +20,7 @@ public class SystemManager : MonoBehaviour
     [SerializeField] private GameObject combatUI;
     [SerializeField] private GameObject kbAttack;
     public Slider bossHPBar;
+    public GameObject bossHPBarObj;
     public GameObject player;
     private AudioSource gameMusic;
 
@@ -75,13 +78,36 @@ public class SystemManager : MonoBehaviour
         GameState = state;
     }
 
-    public void SetTotalHP(float health)
+    public void SetBossHealthBar(float health)
     {
         bossHPBar.maxValue = health;
     }
 
-    public void AddHealth(float damage)
+    public void DamageBossHealthBar(float damage)
     {
         bossHPBar.value -= damage;
+    }
+
+    public void DoCameraShake(float duration, float magnitude)
+    {
+        StartCoroutine(CameraShake.instance.Shake(Camera.main, duration, magnitude));
+    }
+
+    public void DoHealthBarShake(float duration, float magnitude)
+    {
+        StartCoroutine(HealthBarShake.instance.Shake(bossHPBar.gameObject, duration, magnitude));
+    }
+
+    // Test Camera Shake
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            DoCameraShake(0.5f, 0.5f);
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            DoHealthBarShake(0.1f, 0.06f);
+        }
     }
 }

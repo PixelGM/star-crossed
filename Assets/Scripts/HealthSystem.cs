@@ -4,28 +4,38 @@ using UnityEngine;
 
 public class HealthSystem : MonoBehaviour
 {
-    protected float health;
+    public float fHealth { get; private set; }
     [SerializeField]
-    protected const float MAXHEALTH = 100f;
+    public const float MAXHEALTH = 100f;
     [SerializeField] bool isBoss = false;
     // Start is called before the first frame update
+    
     void Start()
     {
-        health = MAXHEALTH;  
+        // Set localPlayer's health to max health
+        fHealth = MAXHEALTH;
     }
 
     public void TakeDamage(float damage)
     {
-        if (health > 0f) 
+        if (fHealth > 0f)
         {
-            health -= damage; // damage amount depend on Bullet script
-            Debug.Log("Entity Health: " + health); // console log check
-            if (isBoss){
-                SystemManager.instance.AddHealth(damage);
+            fHealth -= damage; // damage amount depend on Bullet script
+            Debug.Log("Entity Health: " + fHealth); // console log check
+            if (isBoss)
+            {
+                // Subtract health from boss health bar
+                SystemManager.instance.DamageBossHealthBar(damage);
+                // Camera shake effect when boss is hit
+                SystemManager.instance.DoCameraShake(0.09f, 0.09f);
+                // Health bar shake effect when boss is hit
+                SystemManager.instance.DoHealthBarShake(0.1f, 0.06f);
             }
-            if (health <= 0f) {
+            if (fHealth <= 0f)
+            {
                 Debug.Log("Entity is dead"); // console log check
-                if (gameObject.CompareTag("Enemy")) {
+                if (gameObject.CompareTag("Enemy"))
+                {
                     if (isBoss)
                         SystemManager.instance.ChangeGameState(0);
                     Destroy(gameObject);
@@ -36,23 +46,16 @@ public class HealthSystem : MonoBehaviour
 
     public void ReplenishHealth(float heal)
     {
-        if (health < MAXHEALTH) {
-            health += heal; // heal amount depend on HealItem script
-            if (health> MAXHEALTH)
-                health= MAXHEALTH;
-            Debug.Log("Entity Health: " + health); // console log check
-        } else {
+        if (fHealth < MAXHEALTH)
+        {
+            fHealth += heal; // heal amount depend on HealItem script
+            if (fHealth > MAXHEALTH)
+                fHealth = MAXHEALTH;
+            Debug.Log("Entity Health: " + fHealth); // console log check
+        }
+        else
+        {
             Debug.Log("Entity at max health"); // console log check
         }
-    }
-
-    public float getMaxHealth()
-    {
-        return MAXHEALTH;
-    }
-
-    public float getHealth()
-    {
-        return health;
     }
 }
